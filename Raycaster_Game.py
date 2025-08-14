@@ -3,6 +3,7 @@ import pygame
 import math
 from minimap import draw_minimap
 from cast_rays import *
+#from cast_rays_textured import *
 import settings
 import map1
 from machine_gun import *
@@ -10,6 +11,7 @@ from machine_gun import *
 def main():
     pygame.init()
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
+    
     clock = pygame.time.Clock()
     pygame.event.set_grab(True)
     pygame.mouse.set_visible(False)
