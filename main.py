@@ -1,17 +1,17 @@
 # raycaster_game.py
+import settings
 import pygame
 import math
 from minimap import draw_minimap
-from cast_rays import *
+#from cast_rays import *
 #from cast_rays_textured import *
-import settings
+import raycaster
 import map1
 from machine_gun import *
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
-    
     clock = pygame.time.Clock()
     pygame.event.set_grab(True)
     pygame.mouse.set_visible(False)
@@ -20,6 +20,13 @@ def main():
     px, py = settings.TILE_SIZE * 1.5, settings.TILE_SIZE * 1.5
     angle = 0
 
+    raycaster.load_textures({
+        1: "textures/wood_256x256.png",
+        2: "textures/glass_256x256.png",
+        3: "textures/metal_256x256.png",
+        # ... up to 64
+    })
+    
     running = True
     while running:
         
@@ -51,7 +58,7 @@ def main():
 
         new_px = px + dx
         new_py = py + dy
-
+        
         # Horizontal collision
         i, j = int(new_px / settings.TILE_SIZE), int(py / settings.TILE_SIZE)
         if map1.game_map[j][i] == 0:
@@ -63,13 +70,8 @@ def main():
             py = new_py
             
         screen.fill((30, 30, 30))
-        cast_rays(screen, px, py, angle)
+        raycaster.cast_rays(screen, px, py, angle)
         draw_minimap(screen, map1.game_map, settings.TILE_SIZE, px, py, angle)
-        
-        draw_gun(screen)
-        if pygame.mouse.get_pressed()[0]:
-            fire_gun()
-        update_bullets(screen)
         
         pygame.display.flip()
         clock.tick(60)

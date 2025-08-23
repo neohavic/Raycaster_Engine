@@ -3,9 +3,18 @@ import settings
 import map1
 import math
 
-def cast_rays(screen, px, py, angle, wall_texture):
+# Load texture once at module level
+wall_texture = None
+
+def load_texture(path):
+    global wall_texture
+    wall_texture = pygame.image.load(path).convert()
+    wall_texture = pygame.transform.scale(wall_texture, (settings.TILE_SIZE, settings.TILE_SIZE))
+
+def cast_rays(screen, px, py, angle):
     start_angle = angle - settings.FOV / 2
     texture_width, texture_height = wall_texture.get_size()
+    column_width = settings.SCREEN_WIDTH / settings.NUM_RAYS
 
     for ray in range(settings.NUM_RAYS):
         ray_angle = start_angle + ray * settings.DELTA_ANGLE
@@ -23,19 +32,20 @@ def cast_rays(screen, px, py, angle, wall_texture):
                     corrected_depth = depth * math.cos(ray_angle - angle)
                     wall_height = 30000 / (corrected_depth + 0.0001)
 
-                    # Texture sampling
-                    hit_x = x % settings.TILE_SIZE if map1.game_map[j][i] else y % settings.TILE_SIZE
+                    # Determine hit orientation
+                    if abs(cos_a) > abs(sin_a):
+                        hit_x = y % settings.TILE_SIZE
+                    else:
+                        hit_x = x % settings.TILE_SIZE
+
                     tex_x = int(hit_x / settings.TILE_SIZE * texture_width)
 
-                    # Scale texture slice
+                    # Sample and scale texture column
                     column = wall_texture.subsurface(tex_x, 0, 1, texture_height)
-                    column = pygame.transform.scale(column, (
-                        settings.SCREEN_WIDTH // settings.NUM_RAYS,
-                        int(wall_height)
-                    ))
+                    column = pygame.transform.scale(column, (int(column_width), int(wall_height)))
 
                     screen.blit(column, (
-                        ray * (settings.SCREEN_WIDTH // settings.NUM_RAYS),
-                        settings.SCREEN_HEIGHT // 2 - wall_height // 2
+                        int(ray * column_width),
+                        settings.SCREEN_HEIGHT // 2 - int(wall_height) // 2
                     ))
                     break
